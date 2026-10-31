@@ -25,7 +25,7 @@ all coordinated through a LangGraph workflow.
 
 ## Tech Stack
 
-- Python 3.10+
+- Python 3.11+
 - FastAPI
 - Jinja2 + HTML/CSS/JavaScript frontend
 - LangGraph
@@ -51,7 +51,7 @@ all coordinated through a LangGraph workflow.
 
 Before running the project locally, make sure you have:
 
-- Python 3.10 or newer installed
+- Python 3.11 or newer (the project pins Python 3.11 in `.python-version`)
 - PostgreSQL running and accessible
 - API keys for:
   - Groq
@@ -72,6 +72,26 @@ DEFAULT_ORIGIN_IATA=DAC
 
 ## Installation
 
+Run the following commands from the project root.
+
+### Using uv
+
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/) if it is not already available:
+
+```bash
+python -m pip install uv
+```
+
+Create the virtual environment and install the locked dependencies:
+
+```bash
+uv sync --locked
+```
+
+This creates `.venv` using the Python version in `.python-version` and installs dependencies from `pyproject.toml` and `uv.lock`. uv downloads Python if the requested version is unavailable. You do not need to activate the environment when using `uv run`.
+
+### Using pip
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate   # On Windows: .venv\Scripts\activate
@@ -81,6 +101,14 @@ pip install -r requirements.txt
 ## Running the App
 
 Start the FastAPI server:
+
+With uv:
+
+```bash
+uv run --locked python app.py
+```
+
+With pip (after activating `.venv`):
 
 ```bash
 python app.py

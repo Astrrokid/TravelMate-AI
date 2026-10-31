@@ -2,6 +2,7 @@ from pathlib import Path
 import traceback
 
 import uvicorn
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, HTMLResponse
@@ -9,14 +10,23 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
-from backend import run_travel_graph
+from backend import run_travel_graph, initialize_travel_graph
 
 BASE_DIR = Path(__file__).resolve().parent
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # This runs BEFORE the application starts taking requests (Startup)
+
+    await initialize_travel_graph()
+
+    yield
 
 app = FastAPI(
     title="TravelMate-AI",
     description="TravelMate-AI is an AI-powered travel assistant that helps you plan your trips",
     version="1.0.0",
+    lifespan=lifespan
 
 )
 
@@ -39,7 +49,6 @@ async def home(request: Request):
         name="index.html",
         context={}
     )
-
 @app.post("/api/travel")
 async def travel_planner(request_data: TravelRequest):
     try:
@@ -54,7 +63,7 @@ async def travel_planner(request_data: TravelRequest):
                 }
             )
 
-        result = run_travel_graph(
+        result = await run_travel_graph(
             user_input=user_message,
             thread_id=request_data.thread_id
 
@@ -67,6 +76,7 @@ async def travel_planner(request_data: TravelRequest):
                 "answer": result["answer"],
                 "flight_results": result["flight_results"],
                 "hotel_results": result["hotel_results"],
+                "weather_results": result["weather_results"],
                 "itinerary": result["itinerary"],
                 "llm_calls": result["llm_calls"],
             }
